@@ -241,6 +241,11 @@ static int s3c_backlight_notify(struct device *dev, int brightness)
 	return brightness;
 }
 
+static int s3c_backlight_check_fb(struct device *dev, struct fb_info *fi)
+{
+	return 1;
+}
+
 static struct platform_pwm_backlight_data s3c_backlight_data = {
 	.pwm_id = 0,
 	.max_brightness = 24,
@@ -249,6 +254,7 @@ static struct platform_pwm_backlight_data s3c_backlight_data = {
 	.init = s3c_backlight_init,
 	.notify = s3c_backlight_notify,
 	.exit = s3c_backlight_exit,
+	.check_fb = s3c_backlight_check_fb,
 };
 
 static struct platform_device s3c_device_backlight = {
