@@ -324,6 +324,24 @@ static void gpio_keys_report_event(struct gpio_button_data *bdata)
 	unsigned int type = button->type ?: EV_KEY;
 	int state = (gpio_get_value_cansleep(button->gpio) ? 1 : 0) ^ button->active_low;
 
+	if (button->inverse_gpio) {
+		int inverse_state = (gpio_get_value_cansleep(button->inverse_gpio) ? 1 : 0) ^ button->active_low;
+		if (state == inverse_state)
+			return;
+		else {
+			state = 1;
+			if (type == EV_ABS) {
+				if (state)
+					input_event(input, type, button->code, button->value);
+			} else {
+				input_event(input, type, button->code, !!state);
+			}
+			input_sync(input);
+
+			state = 0;
+		}
+	}
+
 	if (type == EV_ABS) {
 		if (state)
 			input_event(input, type, button->code, button->value);

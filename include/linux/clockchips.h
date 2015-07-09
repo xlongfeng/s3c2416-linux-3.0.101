@@ -165,6 +165,8 @@ extern void clockevents_notify(unsigned long reason, void *arg);
 
 #else /* CONFIG_GENERIC_CLOCKEVENTS_BUILD */
 
+static inline int tick_check_broadcast_pending(void) { return 0; }
+
 #define clockevents_notify(reason, arg) do { } while (0)
 
 #endif

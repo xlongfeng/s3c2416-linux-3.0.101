@@ -201,15 +201,25 @@ config MTD_NAND_S3C2410
 	  No board specific support is done by this driver, each board
 	  must advertise a platform_device for the driver to attach.
 
+config MTD_NAND_S3C2416
+	tristate "NAND Flash support for Samsung S3C2416 SoCs"
+	depends on ARCH_S3C2410 || ARCH_S3C64XX
+	help
+	  This enables the NAND flash controller on the S3C24xx and S3C64xx
+	  SoCs
+
+	  No board specific support is done by this driver, each board
+	  must advertise a platform_device for the driver to attach.
+
 config MTD_NAND_S3C2410_DEBUG
 	bool "Samsung S3C NAND driver debug"
-	depends on MTD_NAND_S3C2410
+	depends on MTD_NAND_S3C2410 || MTD_NAND_S3C2416
 	help
 	  Enable debugging of the S3C NAND driver
 
 config MTD_NAND_S3C2410_HWECC
 	bool "Samsung S3C NAND Hardware ECC"
-	depends on MTD_NAND_S3C2410
+	depends on MTD_NAND_S3C2410 || MTD_NAND_S3C2416
 	help
 	  Enable the use of the controller's internal ECC generator when
 	  using NAND. Early versions of the chips have had problems with
@@ -225,7 +235,7 @@ config MTD_NAND_NDFC
 
 config MTD_NAND_S3C2410_CLKSTOP
 	bool "Samsung S3C NAND IDLE clock stop"
-	depends on MTD_NAND_S3C2410
+	depends on MTD_NAND_S3C2410 || MTD_NAND_S3C2416
 	default n
 	help
 	  Stop the clock to the NAND controller when there is no chip
