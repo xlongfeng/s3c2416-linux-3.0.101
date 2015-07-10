@@ -329,10 +329,17 @@ static struct gpio_keys_button s3c_gpio_keys_table[] = {
 		.active_low	= 1,
 		.desc		= "Ok button"
 	},
+	{
+		.code		= KEY_Q,
+		.gpio		= S3C2410_GPF(0),
+		.active_low	= 1,
+		.desc		= "Satisfy Qt"
+	},
 };
 
 static int s3c_gpio_keys_enable(struct device *dev)
 {
+	s3c_gpio_setpull(S3C2410_GPF(0), S3C_GPIO_PULL_UP);
 	s3c_gpio_setpull(S3C2410_GPF(1), S3C_GPIO_PULL_UP);
 	s3c_gpio_setpull(S3C2410_GPF(3), S3C_GPIO_PULL_UP);
 	s3c_gpio_setpull(S3C2410_GPF(5), S3C_GPIO_PULL_UP);
