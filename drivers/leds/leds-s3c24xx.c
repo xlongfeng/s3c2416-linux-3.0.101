@@ -25,8 +25,10 @@
 /* our context */
 
 struct s3c24xx_gpio_led {
-	struct led_classdev		 cdev;
+	struct led_classdev		cdev;
 	struct s3c24xx_led_platdata	*pdata;
+	struct work_struct		work;
+	enum led_brightness		new_brightness;
 };
 
 static inline struct s3c24xx_gpio_led *pdev_to_gpio(struct platform_device *dev)
@@ -39,11 +41,11 @@ static inline struct s3c24xx_gpio_led *to_gpio(struct led_classdev *led_cdev)
 	return container_of(led_cdev, struct s3c24xx_gpio_led, cdev);
 }
 
-static void s3c24xx_led_set(struct led_classdev *led_cdev,
-			    enum led_brightness value)
+static void s3c24xx_led_work(struct work_struct *work)
 {
-	struct s3c24xx_gpio_led *led = to_gpio(led_cdev);
+	struct s3c24xx_gpio_led *led = container_of(work, struct s3c24xx_gpio_led, work);
 	struct s3c24xx_led_platdata *pd = led->pdata;
+	enum led_brightness value = led->new_brightness;
 
 	/* there will be a short delay between setting the output and
 	 * going from output to input when using tristate. */
@@ -54,13 +56,23 @@ static void s3c24xx_led_set(struct led_classdev *led_cdev,
 	if (pd->flags & S3C24XX_LEDF_TRISTATE)
 		s3c2410_gpio_cfgpin(pd->gpio,
 			value ? S3C2410_GPIO_OUTPUT : S3C2410_GPIO_INPUT);
+}
 
+
+static void s3c24xx_led_set(struct led_classdev *led_cdev,
+			    enum led_brightness value)
+{
+	struct s3c24xx_gpio_led *led = to_gpio(led_cdev);
+
+	led->new_brightness = value;
+	schedule_work(&led->work);
 }
 
 static int s3c24xx_led_remove(struct platform_device *dev)
 {
 	struct s3c24xx_gpio_led *led = pdev_to_gpio(dev);
 
+	cancel_work_sync(&led->work);
 	led_classdev_unregister(&led->cdev);
 	kfree(led);
 
@@ -99,11 +111,15 @@ static int s3c24xx_led_probe(struct platform_device *dev)
 		s3c2410_gpio_cfgpin(pdata->gpio, S3C2410_GPIO_OUTPUT);
 	}
 
+
+	INIT_WORK(&led->work, s3c24xx_led_work);
+
 	/* register our new led device */
 
 	ret = led_classdev_register(&dev->dev, &led->cdev);
 	if (ret < 0) {
 		dev_err(&dev->dev, "led_classdev_register failed\n");
+		cancel_work_sync(&led->work);
 		kfree(led);
 		return ret;
 	}
