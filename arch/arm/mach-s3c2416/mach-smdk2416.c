@@ -29,6 +29,7 @@
 #include <linux/smsc911x.h>
 #include <linux/pwm_backlight.h>
 #include <linux/pwm.h>
+#include <linux/spi/spi.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -45,6 +46,7 @@
 
 #include <mach/idle.h>
 #include <mach/leds-gpio.h>
+#include <mach/spi-gpio.h>
 #include <plat/iic.h>
 
 #include <plat/s3c2416.h>
@@ -411,6 +413,40 @@ struct platform_device s3c_device_smsc911x = {
 	},
 };
 
+#define SPI_GPIO_CHIP_SELECT_0 S3C2410_GPE(5)
+
+static void s3c_spi_gpio_chip_select(struct s3c2410_spigpio_info *spi, int cs)
+{
+	gpio_set_value(SPI_GPIO_CHIP_SELECT_0, cs ? 0 : 1);
+}
+
+static struct s3c2410_spigpio_info s3c_spi_gpio_pdata = {
+	.pin_clk = S3C2410_GPE(8),
+	.pin_mosi = S3C2410_GPE(9),
+	.pin_miso = S3C2410_GPE(10),
+	.num_chipselect = 1,
+	.bus_num = 0,
+	.chip_select = s3c_spi_gpio_chip_select,
+};
+
+struct platform_device s3c_device_gpio_spi = {
+	.name           = "spi_s3c24xx_gpio",
+	.id             =  -1,
+	.dev = {
+		.platform_data = &s3c_spi_gpio_pdata,
+	},
+};
+
+static struct spi_board_info s3c_spi_board_info[] = {
+	{
+		.modalias = "spidev",
+		.max_speed_hz = 1000000,
+		.bus_num = 0,
+		.chip_select = 0,
+		.mode = SPI_MODE_0,
+	},
+};
+
 static struct platform_device *smdk2416_devices[] __initdata = {
 	&s3c_device_fb,
 	&s3c_device_wdt,
@@ -423,6 +459,7 @@ static struct platform_device *smdk2416_devices[] __initdata = {
 	&s3c_device_backlight,
 	&s3c_device_gpiokeys,
 	&s3c_device_smsc911x,
+	&s3c_device_gpio_spi,
 };
 
 static void __init smdk2416_map_io(void)
@@ -443,6 +480,12 @@ static void __init smdk2416_machine_init(void)
 	s3c24xx_hsudc_set_platdata(&smdk2416_hsudc_platdata);
 
 	platform_add_devices(smdk2416_devices, ARRAY_SIZE(smdk2416_devices));
+
+	WARN_ON(gpio_request(SPI_GPIO_CHIP_SELECT_0, "spi_s3c24xx_gpio"));
+	gpio_direction_output(SPI_GPIO_CHIP_SELECT_0, 1);
+	spi_register_board_info( s3c_spi_board_info,
+			ARRAY_SIZE( s3c_spi_board_info));
+
 	smdk_machine_init();
 }
 
