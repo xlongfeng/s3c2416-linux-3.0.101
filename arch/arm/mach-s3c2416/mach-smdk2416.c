@@ -413,11 +413,13 @@ struct platform_device s3c_device_smsc911x = {
 	},
 };
 
-#define SPI_GPIO_CHIP_SELECT_0 S3C2410_GPE(5)
+#define SPI_GPIO_CHIP_SELECT S3C2410_GPE(5)
+#define SPI_GPIO_CHIP_IRQ S3C2410_GPE(6)
+#define SPI_GPIO_CHIP_SDN S3C2410_GPE(7)
 
 static void s3c_spi_gpio_chip_select(struct s3c2410_spigpio_info *spi, int cs)
 {
-	gpio_set_value(SPI_GPIO_CHIP_SELECT_0, cs ? 0 : 1);
+	gpio_set_value(SPI_GPIO_CHIP_SELECT, cs ? 0 : 1);
 }
 
 static struct s3c2410_spigpio_info s3c_spi_gpio_pdata = {
@@ -440,7 +442,7 @@ struct platform_device s3c_device_gpio_spi = {
 static struct spi_board_info s3c_spi_board_info[] = {
 	{
 		.modalias = "spidev",
-		.max_speed_hz = 1000000,
+		.max_speed_hz = 4000000,
 		.bus_num = 0,
 		.chip_select = 0,
 		.mode = SPI_MODE_0,
@@ -481,8 +483,14 @@ static void __init smdk2416_machine_init(void)
 
 	platform_add_devices(smdk2416_devices, ARRAY_SIZE(smdk2416_devices));
 
-	WARN_ON(gpio_request(SPI_GPIO_CHIP_SELECT_0, "spi_s3c24xx_gpio"));
-	gpio_direction_output(SPI_GPIO_CHIP_SELECT_0, 1);
+	WARN_ON(gpio_request(SPI_GPIO_CHIP_SELECT, "spi_s3c24xx_gpio"));
+	gpio_direction_output(SPI_GPIO_CHIP_SELECT, 1);
+	WARN_ON(gpio_request(SPI_GPIO_CHIP_IRQ, "spi_s3c24xx_gpio"));
+	WARN_ON(gpio_export(SPI_GPIO_CHIP_IRQ, true));
+	gpio_direction_input(SPI_GPIO_CHIP_IRQ);
+	WARN_ON(gpio_request(SPI_GPIO_CHIP_SDN, "spi_s3c24xx_gpio"));
+	WARN_ON(gpio_export(SPI_GPIO_CHIP_SDN, true));
+	gpio_direction_output(SPI_GPIO_CHIP_SDN, 1);
 	spi_register_board_info( s3c_spi_board_info,
 			ARRAY_SIZE( s3c_spi_board_info));
 
