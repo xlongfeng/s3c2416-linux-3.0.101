@@ -92,6 +92,22 @@ static struct clksrc_clk hsmmc_mux[] = {
 	},
 };
 
+/* hsspi
+ *
+ * high-speed spi clock, sourced from esysclk
+*/
+
+static struct clksrc_clk clk_hsspi = {
+	.clk	= {
+		.name		= "hsspi",
+		.id		= -1,
+		.parent		= &clk_esysclk.clk,
+		.ctrlbit	= S3C2443_SCLKCON_HSSPICLK,
+		.enable		= s3c2443_clkcon_enable_s,
+	},
+	.reg_div = { .reg = S3C2443_CLKDIV1, .size = 2, .shift = 4 },
+};
+
 static struct clk hsmmc0_clk = {
 	.name		= "hsmmc",
 	.id		= 0,
@@ -118,6 +134,7 @@ static struct clksrc_clk *clksrcs[] __initdata = {
 	&hsmmc_div[1],
 	&hsmmc_mux[0],
 	&hsmmc_mux[1],
+	&clk_hsspi,
 };
 
 void __init s3c2416_init_clocks(int xtal)

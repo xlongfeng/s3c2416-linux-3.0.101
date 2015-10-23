@@ -30,6 +30,7 @@
 #include <linux/pwm_backlight.h>
 #include <linux/pwm.h>
 #include <linux/spi/spi.h>
+#include <linux/spi/spi_bitbang.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -57,6 +58,7 @@
 #include <plat/nand.h>
 #include <plat/sdhci.h>
 #include <plat/udc.h>
+#include <plat/s3c2416-spi.h>
 
 #include <plat/regs-fb-v4.h>
 #include <plat/fb.h>
@@ -417,9 +419,18 @@ struct platform_device s3c_device_smsc911x = {
 #define SPI_GPIO_CHIP_IRQ S3C2410_GPE(6)
 #define SPI_GPIO_CHIP_SDN S3C2410_GPE(7)
 
+#ifdef CONFIG_SPI_S3C24XX_GPIO
+
 static void s3c_spi_gpio_chip_select(struct s3c2410_spigpio_info *spi, int cs)
 {
-	gpio_set_value(SPI_GPIO_CHIP_SELECT, cs ? 0 : 1);
+	switch (cs) {
+	case BITBANG_CS_ACTIVE:
+		gpio_set_value(SPI_GPIO_CHIP_SELECT, 0);
+		break;
+	case BITBANG_CS_INACTIVE:
+		gpio_set_value(SPI_GPIO_CHIP_SELECT, 1);
+		break;
+	}
 }
 
 static struct s3c2410_spigpio_info s3c_spi_gpio_pdata = {
@@ -438,14 +449,26 @@ struct platform_device s3c_device_gpio_spi = {
 		.platform_data = &s3c_spi_gpio_pdata,
 	},
 };
+#endif
+
+static void s3c_spi_set_level(unsigned line_id, int lvl)
+{
+	gpio_direction_output(line_id, lvl);
+}
+
+static struct s3c2416_spi_csinfo si4432_spi_chip = {
+	.line = SPI_GPIO_CHIP_SELECT,
+	.set_level = s3c_spi_set_level,
+};
 
 static struct spi_board_info s3c_spi_board_info[] = {
 	{
 		.modalias = "spidev",
-		.max_speed_hz = 4000000,
+		.max_speed_hz = 8000000,
 		.bus_num = 0,
 		.chip_select = 0,
 		.mode = SPI_MODE_0,
+		.controller_data= &si4432_spi_chip,
 	},
 };
 
@@ -461,7 +484,11 @@ static struct platform_device *smdk2416_devices[] __initdata = {
 	&s3c_device_backlight,
 	&s3c_device_gpiokeys,
 	&s3c_device_smsc911x,
+#ifdef CONFIG_SPI_S3C24XX_GPIO
 	&s3c_device_gpio_spi,
+#else
+	&s3c2416_device_spi,
+#endif
 };
 
 static void __init smdk2416_map_io(void)
@@ -480,6 +507,8 @@ static void __init smdk2416_machine_init(void)
 	s3c_sdhci1_set_platdata(&smdk2416_hsmmc1_pdata);
 
 	s3c24xx_hsudc_set_platdata(&smdk2416_hsudc_platdata);
+
+	s3c2416_spi_set_info(0, 1);
 
 	platform_add_devices(smdk2416_devices, ARRAY_SIZE(smdk2416_devices));
 

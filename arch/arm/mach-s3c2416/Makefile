@@ -20,4 +20,4 @@ obj-$(CONFIG_S3C2416_SETUP_SDHCI_GPIO) += setup-sdhci-gpio.o
 
 # Machine support
 
-obj-$(CONFIG_MACH_SMDK2416)	+= mach-smdk2416.o
+obj-$(CONFIG_MACH_SMDK2416)	+= mach-smdk2416.o dev-spi.o

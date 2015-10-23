@@ -74,6 +74,8 @@ extern struct platform_device s3c_device_cfcon;
 extern struct platform_device s3c_device_spi0;
 extern struct platform_device s3c_device_spi1;
 
+extern struct platform_device s3c2416_device_spi;
+
 extern struct platform_device s5pc100_device_spi0;
 extern struct platform_device s5pc100_device_spi1;
 extern struct platform_device s5pc100_device_spi2;

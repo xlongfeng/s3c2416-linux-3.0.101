@@ -121,4 +121,6 @@
 #define S3C_PA_WDT	    S3C2410_PA_WATCHDOG
 #define S3C_PA_NAND	    S3C24XX_PA_NAND
 
+#define S3C2416_PA_SPI      (0x52000000)
+
 #endif /* __ASM_ARCH_MAP_H */
