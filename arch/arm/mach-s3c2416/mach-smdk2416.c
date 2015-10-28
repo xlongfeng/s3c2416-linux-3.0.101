@@ -484,6 +484,8 @@ static struct platform_device *smdk2416_devices[] __initdata = {
 	&s3c_device_backlight,
 	&s3c_device_gpiokeys,
 	&s3c_device_smsc911x,
+	&s3c_device_ac97,
+	&samsung_asoc_dma,
 #ifdef CONFIG_SPI_S3C24XX_GPIO
 	&s3c_device_gpio_spi,
 #else

@@ -133,6 +133,14 @@ config SND_SOC_SAMSUNG_RX1950_UDA1380
 	help
 	  This driver provides audio support for HP iPAQ RX1950 PDA.
 
+config SND_SOC_SAMSUNG_SMDK_WM9712
+	tristate "SoC AC97 Audio support for SMDK with WM9712"
+	depends on SND_SOC_SAMSUNG && MACH_SMDK2416
+	select SND_SOC_WM9712
+	select SND_SAMSUNG_AC97
+	help
+	  Sat Y if you want to add support for SoC audio on the SMDK.
+
 config SND_SOC_SAMSUNG_SMDK_WM9713
 	tristate "SoC AC97 Audio support for SMDK with WM9713"
 	depends on SND_SOC_SAMSUNG && (MACH_SMDK6410 || MACH_SMDKC100 || MACH_SMDKV210 || MACH_SMDKC110 || MACH_SMDKV310 || MACH_SMDKC210)

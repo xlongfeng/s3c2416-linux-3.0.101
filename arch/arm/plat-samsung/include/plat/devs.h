@@ -147,7 +147,7 @@ extern struct platform_device exynos4_device_sysmmu;
 
 /* s3c2440 specific devices */
 
-#ifdef CONFIG_CPU_S3C2440
+#if defined(CONFIG_CPU_S3C2440) || defined(CONFIG_CPU_S3C2416)
 
 extern struct platform_device s3c_device_camif;
 extern struct platform_device s3c_device_ac97;

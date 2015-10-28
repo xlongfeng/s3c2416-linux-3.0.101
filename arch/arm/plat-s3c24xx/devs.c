@@ -23,6 +23,7 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/dma-mapping.h>
+#include <linux/gpio.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -38,6 +39,8 @@
 #include <plat/mci.h>
 
 #include <plat/devs.h>
+#include <plat/audio.h>
+#include <plat/gpio-cfg.h>
 #include <plat/cpu.h>
 #include <plat/regs-spi.h>
 #include <plat/ts.h>
@@ -455,7 +458,7 @@ struct platform_device s3c_device_spi1 = {
 
 EXPORT_SYMBOL(s3c_device_spi1);
 
-#ifdef CONFIG_CPU_S3C2440
+#if defined(CONFIG_CPU_S3C2440) || defined(CONFIG_CPU_S3C2416)
 
 /* Camif Controller */
 
@@ -523,12 +526,25 @@ static struct resource s3c_ac97_resource[] = {
 
 static u64 s3c_device_audio_dmamask = 0xffffffffUL;
 
+static int s3c24xx_pcm_cfg_gpio(struct platform_device *pdev)
+{
+	unsigned int base = S3C2410_GPE(0);
+
+	s3c_gpio_cfgpin_range(base, 5, S3C_GPIO_SFN(3));
+	return 0;
+}
+
+static struct s3c_audio_pdata s3c_ac97_pdata = {
+	.cfg_gpio = s3c24xx_pcm_cfg_gpio,
+};
+
 struct platform_device s3c_device_ac97 = {
 	.name		  = "samsung-ac97",
 	.id		  = -1,
 	.num_resources	  = ARRAY_SIZE(s3c_ac97_resource),
 	.resource	  = s3c_ac97_resource,
 	.dev              = {
+		.platform_data = &s3c_ac97_pdata,
 		.dma_mask = &s3c_device_audio_dmamask,
 		.coherent_dma_mask = 0xffffffffUL
 	}

@@ -13,4 +13,6 @@
 
 #define PLAT_PHYS_OFFSET	UL(0x30000000)
 
+#define CONSISTENT_DMA_SIZE	SZ_8M
+
 #endif
