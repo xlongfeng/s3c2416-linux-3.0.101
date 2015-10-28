@@ -418,6 +418,9 @@ struct platform_device s3c_device_smsc911x = {
 #define SPI_GPIO_CHIP_SELECT S3C2410_GPE(5)
 #define SPI_GPIO_CHIP_IRQ S3C2410_GPE(6)
 #define SPI_GPIO_CHIP_SDN S3C2410_GPE(7)
+#define ALARM_YELLOW_LED_GPIO S3C2410_GPK(8)
+#define ALARM_RED_LED_GPIO S3C2410_GPK(7)
+#define ALARM_BLUE_LED_GPIO S3C2410_GPK(9)
 
 #ifdef CONFIG_SPI_S3C24XX_GPIO
 
@@ -516,14 +519,29 @@ static void __init smdk2416_machine_init(void)
 
 	WARN_ON(gpio_request(SPI_GPIO_CHIP_SELECT, "spi_s3c24xx_gpio"));
 	gpio_direction_output(SPI_GPIO_CHIP_SELECT, 1);
+
 	WARN_ON(gpio_request(SPI_GPIO_CHIP_IRQ, "spi_s3c24xx_gpio"));
 	WARN_ON(gpio_export(SPI_GPIO_CHIP_IRQ, true));
 	gpio_direction_input(SPI_GPIO_CHIP_IRQ);
+
 	WARN_ON(gpio_request(SPI_GPIO_CHIP_SDN, "spi_s3c24xx_gpio"));
 	WARN_ON(gpio_export(SPI_GPIO_CHIP_SDN, true));
 	gpio_direction_output(SPI_GPIO_CHIP_SDN, 1);
+
 	spi_register_board_info( s3c_spi_board_info,
 			ARRAY_SIZE( s3c_spi_board_info));
+
+	WARN_ON(gpio_request(ALARM_YELLOW_LED_GPIO, "alarm led gpio"));
+	WARN_ON(gpio_export(ALARM_YELLOW_LED_GPIO, false));
+	gpio_direction_output(ALARM_YELLOW_LED_GPIO, 0);
+
+	WARN_ON(gpio_request(ALARM_RED_LED_GPIO, "alarm led gpio"));
+	WARN_ON(gpio_export(ALARM_RED_LED_GPIO, false));
+	gpio_direction_output(ALARM_RED_LED_GPIO, 0);
+
+	WARN_ON(gpio_request(ALARM_BLUE_LED_GPIO, "alarm led gpio"));
+	WARN_ON(gpio_export(ALARM_BLUE_LED_GPIO, false));
+	gpio_direction_output(ALARM_BLUE_LED_GPIO, 0);
 
 	smdk_machine_init();
 }
