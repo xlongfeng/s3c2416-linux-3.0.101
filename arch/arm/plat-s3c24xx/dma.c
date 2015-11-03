@@ -1403,7 +1403,7 @@ static struct s3c2410_dma_chan *s3c2410_dma_map_channel(int channel)
 			continue;
 
 		if (s3c2410_chans[ch].in_use == 0) {
-			printk("mapped channel %d to %d\n", channel, ch);
+			/* printk("mapped channel %d to %d\n", channel, ch); */
 			break;
 		}
 	}
