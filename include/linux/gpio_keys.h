@@ -5,7 +5,7 @@ struct gpio_keys_button {
 	/* Configuration parameters */
 	unsigned int code;	/* input event code (KEY_*, SW_*) */
 	int gpio;
-	int inverse_gpio;
+	int disc_gpio;
 	int active_low;
 	const char *desc;
 	unsigned int type;	/* input event type (EV_KEY, EV_SW, EV_ABS) */
