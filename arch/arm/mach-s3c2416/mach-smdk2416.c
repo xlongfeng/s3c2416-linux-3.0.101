@@ -31,6 +31,7 @@
 #include <linux/pwm.h>
 #include <linux/spi/spi.h>
 #include <linux/spi/spi_bitbang.h>
+#include <linux/spi/si4432.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -425,7 +426,7 @@ struct platform_device s3c_device_smsc911x = {
 };
 
 #define SPI_GPIO_CHIP_SELECT S3C2410_GPE(5)
-#define SPI_GPIO_CHIP_IRQ S3C2410_GPE(6)
+#define SPI_GPIO_CHIP_IRQ S3C2410_GPG(1)
 #define SPI_GPIO_CHIP_SDN S3C2410_GPE(7)
 #define ALARM_YELLOW_LED_GPIO S3C2410_GPK(8)
 #define ALARM_RED_LED_GPIO S3C2410_GPK(7)
@@ -463,6 +464,11 @@ struct platform_device s3c_device_gpio_spi = {
 };
 #endif
 
+static struct si4432_platform_data si4432_plat_data = {
+	.gpio_irq = SPI_GPIO_CHIP_IRQ,
+	.gpio_sdn = SPI_GPIO_CHIP_SDN,
+};
+
 static void s3c_spi_set_level(unsigned line_id, int lvl)
 {
 	gpio_direction_output(line_id, lvl);
@@ -475,11 +481,12 @@ static struct s3c2416_spi_csinfo si4432_spi_chip = {
 
 static struct spi_board_info s3c_spi_board_info[] = {
 	{
-		.modalias = "spidev",
-		.max_speed_hz = 8000000,
+		.modalias = "si4432",
+		.max_speed_hz = 2000000,
 		.bus_num = 0,
 		.chip_select = 0,
 		.mode = SPI_MODE_0,
+		.platform_data = &si4432_plat_data,
 		.controller_data= &si4432_spi_chip,
 	},
 };
@@ -529,16 +536,8 @@ static void __init smdk2416_machine_init(void)
 	WARN_ON(gpio_request(SPI_GPIO_CHIP_SELECT, "spi_s3c24xx_gpio"));
 	gpio_direction_output(SPI_GPIO_CHIP_SELECT, 1);
 
-	WARN_ON(gpio_request(SPI_GPIO_CHIP_IRQ, "spi_s3c24xx_gpio"));
-	WARN_ON(gpio_export(SPI_GPIO_CHIP_IRQ, true));
-	gpio_direction_input(SPI_GPIO_CHIP_IRQ);
-
-	WARN_ON(gpio_request(SPI_GPIO_CHIP_SDN, "spi_s3c24xx_gpio"));
-	WARN_ON(gpio_export(SPI_GPIO_CHIP_SDN, true));
-	gpio_direction_output(SPI_GPIO_CHIP_SDN, 1);
-
-	spi_register_board_info( s3c_spi_board_info,
-			ARRAY_SIZE( s3c_spi_board_info));
+	spi_register_board_info(s3c_spi_board_info,
+			ARRAY_SIZE(s3c_spi_board_info));
 
 	WARN_ON(gpio_request(ALARM_YELLOW_LED_GPIO, "alarm led gpio"));
 	WARN_ON(gpio_export(ALARM_YELLOW_LED_GPIO, false));

@@ -495,6 +495,10 @@ config MXS_PERFMON
 	depends on ARCH_MX50 || ARCH_MX6
 	default y
 
+config SI4432
+	tristate "si4432 spi driver"
+	default y
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
